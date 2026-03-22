@@ -334,3 +334,36 @@
 .breadcrumb__step-count {
 	color: var(--color-text-secondary);
 }
+
+.breadcrumb__segment--value-stream {
+	color: #0ea5e9;
+	cursor: default;
+}
+
+.breadcrumb__segment--process {
+	color: #a855f7;
+	cursor: default;
+}
+
+.breadcrumb__segment--route {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--color-text);
+	cursor: default;
+}
+
+.breadcrumb__route-state {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.breadcrumb__route-state--active {
+	background: #22c55e;
+}
+
+.breadcrumb__route-state--paused {
+	background: #f59e0b;
+}

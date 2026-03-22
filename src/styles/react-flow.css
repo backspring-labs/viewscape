@@ -1,8 +1,8 @@
 /* Custom terrain node styles */
 .terrain-node {
 	display: flex;
-	align-items: center;
-	gap: 8px;
+	flex-direction: column;
+	gap: 4px;
 	padding: 10px 16px;
 	min-width: 160px;
 	min-height: 60px;
@@ -35,6 +35,12 @@
 	border-radius: 12px;
 }
 
+.terrain-node__content {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
 .terrain-node__icon {
 	font-size: 1.1rem;
 	flex-shrink: 0;
@@ -45,6 +51,44 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+/* Provider badges */
+.terrain-node__badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 3px;
+}
+
+.terrain-node__badge {
+	font-size: 10px;
+	padding: 1px 6px;
+	border-radius: 8px;
+	background: var(--color-provider-default);
+	color: var(--color-bg);
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.terrain-node__badge[data-category="scheme"] {
+	background: var(--color-provider-scheme);
+}
+
+.terrain-node__badge[data-category="rail"] {
+	background: var(--color-provider-rail);
+}
+
+.terrain-node__badge[data-category="wallet"] {
+	background: var(--color-provider-wallet);
+}
+
+.terrain-node__badge[data-category="network"] {
+	background: var(--color-provider-network);
+}
+
+.terrain-node__badge--overflow {
+	background: var(--color-bg-surface);
+	color: var(--color-text-secondary);
 }
 
 /* Edge label styles */

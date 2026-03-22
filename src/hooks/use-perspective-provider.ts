@@ -5,7 +5,14 @@ import {
 	getVisibleNodeIds,
 } from "@/lib/projection.js";
 import { toReactFlowEdges, toReactFlowNodes } from "@/lib/react-flow-adapter.js";
-import { seedCapabilities, seedDomains, seedEdges, seedNodes } from "@/store/seed-loader.js";
+import {
+	seedCapabilities,
+	seedDomains,
+	seedEdges,
+	seedNodes,
+	seedProviderAssociations,
+	seedProviders,
+} from "@/store/seed-loader.js";
 import { useMemo } from "react";
 import type { NavigationContext } from "viewscape-core/context";
 import type { Capability, Domain } from "viewscape-core/entities";
@@ -26,6 +33,8 @@ export function usePerspectiveProvider(nav: NavigationContext, graph: TerrainGra
 			visibleNodeIds,
 			selectedNodeId: nav.selectedNodeId,
 			highlightedNodeIds,
+			providers: seedProviders,
+			providerAssociations: seedProviderAssociations,
 		});
 	}, [nav, graph]);
 

@@ -1,9 +1,10 @@
 import { edgeTypes } from "@/components/canvas/edges/edge-types.js";
 import { nodeTypes } from "@/components/canvas/nodes/node-types.js";
 import { Breadcrumb } from "@/components/navigation/Breadcrumb.js";
+import { StoryRouteBar } from "@/components/route/StoryRouteBar.js";
 import { useInitializeContext, useNavigation } from "@/hooks/use-context-machine.js";
 import { usePerspectiveProvider } from "@/hooks/use-perspective-provider.js";
-import { seedSteps } from "@/store/seed-loader.js";
+import { seedSteps, seedStoryRoutes, seedStoryWaypoints } from "@/store/seed-loader.js";
 import { useUIStore } from "@/store/ui-store.js";
 import {
 	Background,
@@ -37,11 +38,21 @@ export function AppShell() {
 		setEdges(rfEdges);
 	}, [rfEdges, setEdges]);
 
-	// Auto-open right panel on selection, auto-close on clear
+	// Auto-open right panel on selection or focused context, auto-close on clear
 	useEffect(() => {
-		const hasSelection = nav.selectedNodeId != null || nav.selectedEdgeId != null;
-		setRightPanelOpen(hasSelection);
-	}, [nav.selectedNodeId, nav.selectedEdgeId, setRightPanelOpen]);
+		const hasContext =
+			nav.selectedNodeId != null ||
+			nav.selectedEdgeId != null ||
+			nav.activeProcessId != null ||
+			nav.activeValueStreamId != null;
+		setRightPanelOpen(hasContext);
+	}, [
+		nav.selectedNodeId,
+		nav.selectedEdgeId,
+		nav.activeProcessId,
+		nav.activeValueStreamId,
+		setRightPanelOpen,
+	]);
 
 	if (!isReady) {
 		return <div className="app-shell__loading">Loading...</div>;
@@ -50,6 +61,18 @@ export function AppShell() {
 	const journeySteps = nav.activeJourneyId
 		? seedSteps.filter((s) => s.journeyId === nav.activeJourneyId)
 		: [];
+
+	// Derive current story route and waypoint from nav state
+	const activeRoute = nav.activeStoryRouteId
+		? (seedStoryRoutes.find((sr) => sr.id === nav.activeStoryRouteId) ?? null)
+		: null;
+	const routeWaypoints = activeRoute
+		? seedStoryWaypoints
+				.filter((sw) => sw.storyRouteId === activeRoute.id)
+				.sort((a, b) => a.sequenceNumber - b.sequenceNumber)
+		: [];
+	const currentWaypoint =
+		nav.activeWaypointIndex != null ? (routeWaypoints[nav.activeWaypointIndex] ?? null) : null;
 
 	return (
 		<div className="app-shell">
@@ -63,6 +86,10 @@ export function AppShell() {
 				activeJourneyId={nav.activeJourneyId}
 				activeStepIndex={nav.activeStepIndex}
 				totalSteps={journeySteps.length}
+				activeValueStreamId={nav.activeValueStreamId}
+				activeProcessId={nav.activeProcessId}
+				activeStoryRouteId={nav.activeStoryRouteId}
+				routeState={nav.routeState}
 				onClearDomain={() => send({ type: "CLEAR_DOMAIN" })}
 				onClearCapability={() => send({ type: "CLEAR_CAPABILITY" })}
 			/>
@@ -74,7 +101,9 @@ export function AppShell() {
 					onSelectCapability={(id) => send({ type: "SELECT_CAPABILITY", capabilityId: id })}
 					onClearDomain={() => send({ type: "CLEAR_DOMAIN" })}
 				/>
-				<div className="app-shell__canvas">
+				<div
+					className={`app-shell__canvas ${nav.routeState !== "inactive" ? "app-shell__canvas--route-active" : ""}`}
+				>
 					<ReactFlow
 						nodes={nodes}
 						edges={edges}
@@ -119,6 +148,18 @@ export function AppShell() {
 							style={{ background: "#1e293b" }}
 						/>
 					</ReactFlow>
+					<StoryRouteBar
+						routeState={nav.routeState}
+						route={activeRoute}
+						currentWaypoint={currentWaypoint}
+						waypointIndex={nav.activeWaypointIndex ?? 0}
+						totalWaypoints={routeWaypoints.length}
+						onNext={() => send({ type: "NEXT_WAYPOINT" })}
+						onPrevious={() => send({ type: "PREVIOUS_WAYPOINT" })}
+						onPause={() => send({ type: "PAUSE_ROUTE" })}
+						onResume={() => send({ type: "RESUME_ROUTE" })}
+						onEnd={() => send({ type: "END_ROUTE" })}
+					/>
 				</div>
 				{graph && (
 					<RightPanel
@@ -128,6 +169,9 @@ export function AppShell() {
 						onSelectEdge={(id) => send({ type: "SELECT_EDGE", edgeId: id })}
 						onSelectCapability={(id) => send({ type: "SELECT_CAPABILITY", capabilityId: id })}
 						onSelectJourney={(id) => send({ type: "SELECT_JOURNEY", journeyId: id })}
+						onSelectValueStream={(id) => send({ type: "SELECT_VALUE_STREAM", valueStreamId: id })}
+						onSelectProcess={(id) => send({ type: "SELECT_PROCESS", processId: id })}
+						onStartRoute={(id) => send({ type: "START_ROUTE", storyRouteId: id })}
 					/>
 				)}
 			</div>

@@ -16,8 +16,15 @@ import {
 	layers,
 	nodes,
 	perspectives,
+	processStages,
+	processes,
+	providerAssociations,
+	providers,
 	scenes,
 	steps,
+	storyRoutes,
+	storyWaypoints,
+	valueStreams,
 } from "@seed/seed-banking.js";
 import { createGraph } from "viewscape-core/graph";
 
@@ -33,3 +40,10 @@ export const seedLayers = layers;
 export const seedScenes = scenes;
 export const seedAnnotations = annotations;
 export const seedEvidenceRefs = evidenceRefs;
+export const seedProviders = providers;
+export const seedProviderAssociations = providerAssociations;
+export const seedValueStreams = valueStreams;
+export const seedProcesses = processes;
+export const seedProcessStages = processStages;
+export const seedStoryRoutes = storyRoutes;
+export const seedStoryWaypoints = storyWaypoints;

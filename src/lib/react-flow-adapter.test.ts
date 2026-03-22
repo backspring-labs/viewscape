@@ -1,4 +1,9 @@
-import type { Edge as KernelEdge, Node as KernelNode } from "viewscape-core/entities";
+import type {
+	Edge as KernelEdge,
+	Node as KernelNode,
+	Provider,
+	ProviderAssociation,
+} from "viewscape-core/entities";
 import { describe, expect, it } from "vitest";
 import { toReactFlowEdges, toReactFlowNodes } from "./react-flow-adapter.js";
 
@@ -92,6 +97,102 @@ describe("toReactFlowNodes", () => {
 		const result = toReactFlowNodes(testNodes, "persp-overview");
 		expect(result[0]?.data.dimmed).toBe(false);
 		expect(result[1]?.data.dimmed).toBe(false);
+	});
+});
+
+const testProviders: Provider[] = [
+	{ id: "prov-1", label: "Visa", category: "scheme", tags: [], metadata: {} },
+	{ id: "prov-2", label: "RTP", category: "rail", tags: [], metadata: {} },
+	{ id: "prov-3", label: "Extra1", category: "wallet", tags: [], metadata: {} },
+	{ id: "prov-4", label: "Extra2", category: "network", tags: [], metadata: {} },
+];
+
+const testAssociations: ProviderAssociation[] = [
+	{
+		id: "pa-1",
+		providerId: "prov-1",
+		targetType: "node",
+		targetId: "n-1",
+		role: "participant",
+		metadata: {},
+	},
+	{
+		id: "pa-2",
+		providerId: "prov-2",
+		targetType: "node",
+		targetId: "n-1",
+		role: "rail_provider",
+		metadata: {},
+	},
+	{
+		id: "pa-3",
+		providerId: "prov-3",
+		targetType: "node",
+		targetId: "n-1",
+		role: "participant",
+		metadata: {},
+	},
+	{
+		id: "pa-4",
+		providerId: "prov-4",
+		targetType: "node",
+		targetId: "n-1",
+		role: "participant",
+		metadata: {},
+	},
+	{
+		id: "pa-5",
+		providerId: "prov-1",
+		targetType: "capability",
+		targetId: "cap-1",
+		role: "participant",
+		metadata: {},
+	},
+];
+
+describe("toReactFlowNodes — provider badges", () => {
+	it("populates badges for nodes with associations", () => {
+		const result = toReactFlowNodes(testNodes, "persp-overview", {
+			providers: testProviders,
+			providerAssociations: testAssociations,
+		});
+		const n1Badges = result[0]?.data.providerBadges ?? [];
+		expect(n1Badges.length).toBe(4);
+		expect(n1Badges[0]?.label).toBe("Visa");
+		expect(n1Badges[0]?.category).toBe("scheme");
+	});
+
+	it("returns empty badges for nodes without associations", () => {
+		const result = toReactFlowNodes(testNodes, "persp-overview", {
+			providers: testProviders,
+			providerAssociations: testAssociations,
+		});
+		const n2Badges = result[1]?.data.providerBadges ?? [];
+		expect(n2Badges.length).toBe(0);
+	});
+
+	it("only uses node-type associations (not capability)", () => {
+		const result = toReactFlowNodes(testNodes, "persp-overview", {
+			providers: testProviders,
+			providerAssociations: testAssociations,
+		});
+		// pa-5 targets capability, not node — should not appear in badges
+		const n1Badges = result[0]?.data.providerBadges ?? [];
+		expect(n1Badges.every((b) => b.providerId !== "prov-1" || b.label === "Visa")).toBe(true);
+	});
+
+	it("works without providers (backward compat)", () => {
+		const result = toReactFlowNodes(testNodes, "persp-overview");
+		expect(result[0]?.data.providerBadges).toEqual([]);
+		expect(result[1]?.data.providerBadges).toEqual([]);
+	});
+
+	it("includes visibleBadgeCount for overflow rendering", () => {
+		const result = toReactFlowNodes(testNodes, "persp-overview", {
+			providers: testProviders,
+			providerAssociations: testAssociations,
+		});
+		expect(result[0]?.data.visibleBadgeCount).toBe(2);
 	});
 });
 

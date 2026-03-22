@@ -1,14 +1,45 @@
 import type { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import type { Edge as KernelEdge, Node as KernelNode } from "viewscape-core/entities";
+import type { Provider, ProviderAssociation } from "viewscape-core/entities";
+
+export interface ProviderBadge {
+	providerId: string;
+	label: string;
+	category: string;
+}
 
 export interface TerrainNodeData extends Record<string, unknown> {
 	kernelNode: KernelNode;
 	dimmed: boolean;
+	providerBadges: ProviderBadge[];
 }
 
 export interface TerrainEdgeData extends Record<string, unknown> {
 	kernelEdge: KernelEdge;
 	dimmed: boolean;
+}
+
+const MAX_VISIBLE_BADGES = 2;
+
+function resolveProviderBadges(
+	nodeId: string,
+	providers: Provider[],
+	associations: ProviderAssociation[],
+): ProviderBadge[] {
+	const nodeAssociations = associations.filter(
+		(a) => a.targetType === "node" && a.targetId === nodeId,
+	);
+	return nodeAssociations
+		.map((a) => {
+			const provider = providers.find((p) => p.id === a.providerId);
+			if (!provider) return null;
+			return {
+				providerId: provider.id,
+				label: provider.label,
+				category: provider.category,
+			};
+		})
+		.filter((b): b is ProviderBadge => b != null);
 }
 
 export function toReactFlowNodes(
@@ -18,15 +49,23 @@ export function toReactFlowNodes(
 		visibleNodeIds?: Set<string>;
 		selectedNodeId?: string | null;
 		highlightedNodeIds?: Set<string>;
+		providers?: Provider[];
+		providerAssociations?: ProviderAssociation[];
 	} = {},
 ): ReactFlowNode<TerrainNodeData>[] {
-	const { visibleNodeIds, selectedNodeId, highlightedNodeIds } = options;
+	const {
+		visibleNodeIds,
+		selectedNodeId,
+		highlightedNodeIds,
+		providers = [],
+		providerAssociations = [],
+	} = options;
 
 	return nodes.map((node) => {
 		const pos = node.layoutByPerspective[perspectiveId];
 		const isVisible = !visibleNodeIds || visibleNodeIds.has(node.id);
-
 		const nodeType = resolveNodeType(node.type);
+		const providerBadges = resolveProviderBadges(node.id, providers, providerAssociations);
 
 		return {
 			id: node.id,
@@ -38,6 +77,8 @@ export function toReactFlowNodes(
 				dimmed: !isVisible,
 				label: node.label,
 				highlighted: highlightedNodeIds?.has(node.id) ?? false,
+				providerBadges,
+				visibleBadgeCount: MAX_VISIBLE_BADGES,
 			},
 		};
 	});

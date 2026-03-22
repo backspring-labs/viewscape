@@ -1,4 +1,10 @@
-import { seedAnnotations, seedCapabilities, seedEvidenceRefs } from "@/store/seed-loader.js";
+import {
+	seedAnnotations,
+	seedCapabilities,
+	seedEvidenceRefs,
+	seedProviderAssociations,
+	seedProviders,
+} from "@/store/seed-loader.js";
 import type { NavigationContext } from "viewscape-core/context";
 import type { Node } from "viewscape-core/entities";
 import type { TerrainGraph } from "viewscape-core/graph";
@@ -17,6 +23,12 @@ export function NodeDetailPanel({ node, graph, onSelectNode, onSelectEdge }: Nod
 	const annotations = seedAnnotations.filter((a) => a.targetId === node.id);
 	const evidenceRefs = seedEvidenceRefs.filter((e) => e.relatedEntityIds.includes(node.id));
 	const capabilities = seedCapabilities.filter((c) => c.nodeIds.includes(node.id));
+	const nodeProviderAssocs = seedProviderAssociations.filter(
+		(a) => a.targetType === "node" && a.targetId === node.id,
+	);
+	const nodeProviders = seedProviders.filter((p) =>
+		nodeProviderAssocs.some((a) => a.providerId === p.id),
+	);
 
 	return (
 		<div className="detail-panel">
@@ -36,6 +48,22 @@ export function NodeDetailPanel({ node, graph, onSelectNode, onSelectEdge }: Nod
 							{tag}
 						</span>
 					))}
+				</div>
+			)}
+
+			{nodeProviders.length > 0 && (
+				<div className="detail-panel__section">
+					<h4 className="detail-panel__section-title">Providers</h4>
+					<ul className="detail-panel__list">
+						{nodeProviders.map((p) => (
+							<li key={p.id} className="detail-panel__list-item">
+								<span className="detail-panel__provider-badge" data-category={p.category}>
+									{p.category}
+								</span>
+								{p.label}
+							</li>
+						))}
+					</ul>
 				</div>
 			)}
 

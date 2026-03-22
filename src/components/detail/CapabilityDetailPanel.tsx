@@ -1,13 +1,23 @@
-import { seedJourneys } from "@/store/seed-loader.js";
+import {
+	seedJourneys,
+	seedProcesses,
+	seedProviderAssociations,
+	seedProviders,
+	seedStoryRoutes,
+	seedValueStreams,
+} from "@/store/seed-loader.js";
 import type { Capability } from "viewscape-core/entities";
 import type { TerrainGraph } from "viewscape-core/graph";
-import { getNode } from "viewscape-core/graph";
+import { getNode, getProvidersForCapability } from "viewscape-core/graph";
 
 interface CapabilityDetailPanelProps {
 	capability: Capability;
 	graph: TerrainGraph;
 	onSelectNode: (nodeId: string) => void;
 	onSelectJourney: (journeyId: string) => void;
+	onSelectValueStream?: (valueStreamId: string) => void;
+	onSelectProcess?: (processId: string) => void;
+	onStartRoute?: (storyRouteId: string) => void;
 }
 
 export function CapabilityDetailPanel({
@@ -15,12 +25,26 @@ export function CapabilityDetailPanel({
 	graph,
 	onSelectNode,
 	onSelectJourney,
+	onSelectValueStream,
+	onSelectProcess,
+	onStartRoute,
 }: CapabilityDetailPanelProps) {
 	const referencedNodes = capability.nodeIds
 		.map((id) => getNode(graph, id))
 		.filter((n) => n != null);
 
 	const availableJourneys = seedJourneys.filter((j) => capability.journeyIds.includes(j.id));
+
+	const providerIds = getProvidersForCapability(capability.id, seedProviderAssociations);
+	const capProviders = seedProviders.filter((p) => providerIds.includes(p.id));
+
+	const capValueStreams = seedValueStreams.filter((vs) => vs.capabilityIds.includes(capability.id));
+
+	const capProcesses = seedProcesses.filter((p) => p.capabilityIds.includes(capability.id));
+
+	const capStoryRoutes = seedStoryRoutes.filter((sr) =>
+		sr.tags.some((t) => capability.tags.includes(t)),
+	);
 
 	return (
 		<div className="detail-panel">
@@ -45,6 +69,22 @@ export function CapabilityDetailPanel({
 				</div>
 			)}
 
+			{capProviders.length > 0 && (
+				<div className="detail-panel__section">
+					<h4 className="detail-panel__section-title">Providers</h4>
+					<ul className="detail-panel__list">
+						{capProviders.map((p) => (
+							<li key={p.id} className="detail-panel__list-item">
+								<span className="detail-panel__provider-badge" data-category={p.category}>
+									{p.category}
+								</span>
+								{p.label}
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+
 			{referencedNodes.length > 0 && (
 				<div className="detail-panel__section">
 					<h4 className="detail-panel__section-title">Referenced Nodes</h4>
@@ -65,6 +105,44 @@ export function CapabilityDetailPanel({
 				</div>
 			)}
 
+			{capValueStreams.length > 0 && onSelectValueStream && (
+				<div className="detail-panel__section">
+					<h4 className="detail-panel__section-title">Value Streams</h4>
+					<ul className="detail-panel__list">
+						{capValueStreams.map((vs) => (
+							<li key={vs.id}>
+								<button
+									type="button"
+									className="detail-panel__link"
+									onClick={() => onSelectValueStream(vs.id)}
+								>
+									{vs.label}
+								</button>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+
+			{capProcesses.length > 0 && onSelectProcess && (
+				<div className="detail-panel__section">
+					<h4 className="detail-panel__section-title">Processes</h4>
+					<ul className="detail-panel__list">
+						{capProcesses.map((p) => (
+							<li key={p.id}>
+								<button
+									type="button"
+									className="detail-panel__link"
+									onClick={() => onSelectProcess(p.id)}
+								>
+									{p.label}
+								</button>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+
 			{availableJourneys.length > 0 && (
 				<div className="detail-panel__section">
 					<h4 className="detail-panel__section-title">Journeys</h4>
@@ -77,6 +155,25 @@ export function CapabilityDetailPanel({
 									onClick={() => onSelectJourney(j.id)}
 								>
 									{j.label}
+								</button>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+
+			{capStoryRoutes.length > 0 && onStartRoute && (
+				<div className="detail-panel__section">
+					<h4 className="detail-panel__section-title">Guided Routes</h4>
+					<ul className="detail-panel__list">
+						{capStoryRoutes.map((sr) => (
+							<li key={sr.id}>
+								<button
+									type="button"
+									className="detail-panel__link detail-panel__link--route"
+									onClick={() => onStartRoute(sr.id)}
+								>
+									{sr.title}
 								</button>
 							</li>
 						))}

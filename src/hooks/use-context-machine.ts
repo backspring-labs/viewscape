@@ -3,7 +3,14 @@ import {
 	seedGraph,
 	seedJourneys,
 	seedPerspectives,
+	seedProcessStages,
+	seedProcesses,
+	seedProviderAssociations,
+	seedProviders,
 	seedSteps,
+	seedStoryRoutes,
+	seedStoryWaypoints,
+	seedValueStreams,
 } from "@/store/seed-loader.js";
 import { createActorContext } from "@xstate/react";
 import { contextMachine } from "viewscape-core/context";
@@ -46,6 +53,13 @@ export function useInitializeContext() {
 			journeys: seedJourneys,
 			steps: seedSteps,
 			capabilities: seedCapabilities,
+			providers: seedProviders,
+			providerAssociations: seedProviderAssociations,
+			valueStreams: seedValueStreams,
+			processes: seedProcesses,
+			processStages: seedProcessStages,
+			storyRoutes: seedStoryRoutes,
+			storyWaypoints: seedStoryWaypoints,
 		});
 
 		// Set the default perspective so nodes have positions on first render

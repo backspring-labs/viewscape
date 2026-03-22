@@ -10,6 +10,9 @@ interface RightPanelProps {
 	onSelectEdge: (edgeId: string) => void;
 	onSelectCapability: (capabilityId: string) => void;
 	onSelectJourney: (journeyId: string) => void;
+	onSelectValueStream?: (valueStreamId: string) => void;
+	onSelectProcess?: (processId: string) => void;
+	onStartRoute?: (storyRouteId: string) => void;
 }
 
 export function RightPanel({
@@ -19,6 +22,9 @@ export function RightPanel({
 	onSelectEdge,
 	onSelectCapability,
 	onSelectJourney,
+	onSelectValueStream,
+	onSelectProcess,
+	onStartRoute,
 }: RightPanelProps) {
 	const { rightPanelOpen, toggleRightPanel } = useUIStore();
 
@@ -36,6 +42,9 @@ export function RightPanel({
 						onSelectEdge={onSelectEdge}
 						onSelectCapability={onSelectCapability}
 						onSelectJourney={onSelectJourney}
+						onSelectValueStream={onSelectValueStream}
+						onSelectProcess={onSelectProcess}
+						onStartRoute={onStartRoute}
 					/>
 				</div>
 			)}

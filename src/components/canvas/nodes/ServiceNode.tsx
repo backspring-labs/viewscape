@@ -1,6 +1,7 @@
 import type { TerrainNodeData } from "@/lib/react-flow-adapter.js";
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
+import { ProviderBadges } from "./ProviderBadges.js";
 
 export function ServiceNode({ data, selected }: NodeProps) {
 	const nodeData = data as TerrainNodeData;
@@ -20,8 +21,11 @@ export function ServiceNode({ data, selected }: NodeProps) {
 			}}
 			title={nodeData.kernelNode.description}
 		>
-			<div className="terrain-node__icon">&#x2699;</div>
-			<div className="terrain-node__label">{nodeData.kernelNode.label}</div>
+			<div className="terrain-node__content">
+				<div className="terrain-node__icon">&#x2699;</div>
+				<div className="terrain-node__label">{nodeData.kernelNode.label}</div>
+			</div>
+			<ProviderBadges badges={nodeData.providerBadges} />
 			<Handle type="target" position={Position.Left} />
 			<Handle type="source" position={Position.Right} />
 		</div>

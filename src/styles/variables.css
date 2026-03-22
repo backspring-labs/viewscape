@@ -5,6 +5,13 @@
 	--color-node-system: #8b5cf6;
 	--color-node-screen: #f59e0b;
 
+	/* Provider category colors */
+	--color-provider-scheme: #60a5fa;
+	--color-provider-rail: #34d399;
+	--color-provider-wallet: #fbbf24;
+	--color-provider-network: #a78bfa;
+	--color-provider-default: #94a3b8;
+
 	/* Edge type colors */
 	--color-edge-default: #64748b;
 	--color-edge-service-call: #3b82f6;
